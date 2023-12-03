@@ -9,6 +9,7 @@ obj/
 
 # Visual Studio Code
 .vscode/
+launchSettings.json
 
 # Rider
 .idea/

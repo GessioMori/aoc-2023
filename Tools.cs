@@ -1,4 +1,5 @@
 ﻿using Main.Solutions;
+using System.Text.RegularExpressions;
 
 namespace Main.Tools
 {
@@ -33,7 +34,7 @@ namespace Main.Tools
         public static void RunExampleAndCheck(string[] exampleData, string expectedAnswer, char partChoice, int day)
         {
             ISolution solution = CreateSolutionInstance(day);
-            string result = partChoice == 'A' ? solution.RunPartA(exampleData) : solution.RunPartB(exampleData);
+            string result = partChoice == 'a' ? solution.RunPartA(exampleData) : solution.RunPartB(exampleData);
 
             Console.WriteLine($"Result: {result}");
             Console.WriteLine($"Expected: {expectedAnswer}");
@@ -43,9 +44,31 @@ namespace Main.Tools
         public static void RunSolution(string[] inputData, char partChoice, int day)
         {
             ISolution solution = CreateSolutionInstance(day);
-            string result = partChoice == 'A' ? solution.RunPartA(inputData) : solution.RunPartB(inputData);
+            string result = partChoice == 'a' ? solution.RunPartA(inputData) : solution.RunPartB(inputData);
 
             Console.WriteLine($"Result: {result}");
+        }
+
+        public static bool ValidateArgs(string[] args, out int day, out char? testOrInput, out char? challengePart)
+        {
+            testOrInput = null;
+            challengePart = null;
+            day = 0;
+            if (args.Length > 0)
+            {
+                Match match = Regex.Match(args[0], @"(\d+)(t|i)(a|b)");
+
+                if (match.Success)
+                {
+                    day = int.Parse(match.Groups[1].Value);
+                    testOrInput = char.Parse(match.Groups[2].Value);
+                    challengePart = char.Parse(match.Groups[3].Value);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

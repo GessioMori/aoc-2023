@@ -1,49 +1,31 @@
 ﻿using Main.Tools;
 public static class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        Console.Write("Enter the day for which you want to run the solution: ");
-        if (int.TryParse(Console.ReadLine(), out int dayToRun))
+        if (Tools.ValidateArgs(args, out int dayToRun, out char? exampleOrInputChoice, out char? solutionPartChoice))
         {
-            string inputPath = $"Inputs/day{dayToRun}.txt";
-            string[] inputData = Tools.ReadFileToArray(inputPath);
-
-            string examplePathA = $"Examples/day{dayToRun}_exampleA.txt";
-            string examplePathB = $"Examples/day{dayToRun}_exampleB.txt";
-            string expectedAnswerPath = $"Answers/day{dayToRun}_answer.txt";
-            string[] exampleDataA = Tools.ReadFileToArray(examplePathA);
-            string[] exampleDataB = Tools.ReadFileToArray(examplePathB);
-            string[] expectedAnswer = Tools.ReadFileToArray(expectedAnswerPath);
-
-            Console.Write("Do you want to run the test or the input? (t/I): ");
-            char? exampleOrInputChoice = Console.ReadLine()?.ToUpper()[0];
-            if (exampleOrInputChoice == 'T')
+            if (exampleOrInputChoice == 't')
             {
-                Console.Write("Do you want to run Part A or Part B for the example? (A/B): ");
-                char examplePartChoice = Console.ReadLine()?.ToUpper()[0] ?? 'B';
-                if (examplePartChoice == 'A' || examplePartChoice == 'B')
-                {
-                    Tools.RunExampleAndCheck(examplePartChoice == 'A' ? exampleDataA : exampleDataB, 
-                        examplePartChoice == 'A' ? expectedAnswer[0] : expectedAnswer[1],
-                        examplePartChoice, 
-                        dayToRun);
-                }
+                string examplePath = $"Examples/day{dayToRun}_example{solutionPartChoice.ToString()?.ToUpper()}.txt";
+                string expectedAnswerPath = $"Answers/day{dayToRun}_answer.txt";
+
+                Tools.RunExampleAndCheck(Tools.ReadFileToArray(examplePath),
+                    solutionPartChoice == 'a' ? Tools.ReadFileToArray(expectedAnswerPath)[0] : Tools.ReadFileToArray(expectedAnswerPath)[1],
+                    solutionPartChoice ?? 'a',
+                    dayToRun);
             }
             else
             {
-                Console.Write("Do you want to run Part A or Part B for the solution? (A/B): ");
-                char solutionPartChoice = Console.ReadLine()?.ToUpper()[0] ?? 'B';
+                string inputPath = $"Inputs/day{dayToRun}.txt";
+                string[] inputData = Tools.ReadFileToArray(inputPath);
 
-                if (solutionPartChoice == 'A' || solutionPartChoice == 'B')
-                {
-                    Tools.RunSolution(inputData, solutionPartChoice, dayToRun);
-                }
+                Tools.RunSolution(inputData, solutionPartChoice ?? 'a', dayToRun);
             }
         }
         else
         {
-            Console.WriteLine("Invalid input. Please enter a valid day number.");
+            Console.WriteLine("Invalid input.");
         }
     }
 }

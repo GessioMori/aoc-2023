@@ -7,11 +7,9 @@ public static class Program
         {
             if (exampleOrInputChoice == 't')
             {
-                string examplePath = $"Examples/day{dayToRun}_example{solutionPartChoice.ToString()?.ToUpper()}.txt";
-                string expectedAnswerPath = $"Answers/day{dayToRun}_answer.txt";
+                string examplePath = $"Examples/day{dayToRun}_example.txt";
 
                 Tools.RunExampleAndCheck(Tools.ReadFileToArray(examplePath),
-                    solutionPartChoice == 'a' ? Tools.ReadFileToArray(expectedAnswerPath)[0] : Tools.ReadFileToArray(expectedAnswerPath)[1],
                     solutionPartChoice ?? 'a',
                     dayToRun);
             }

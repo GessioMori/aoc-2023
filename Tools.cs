@@ -31,10 +31,34 @@ namespace Main.Tools
             throw new InvalidOperationException($"Solution type '{typeName}' not found.");
         }
 
-        public static void RunExampleAndCheck(string[] exampleData, string expectedAnswer, char partChoice, int day)
+        public static void RunExampleAndCheck(string[] exampleData, char partChoice, int day)
         {
             ISolution solution = CreateSolutionInstance(day);
-            string result = partChoice == 'a' ? solution.RunPartA(exampleData) : solution.RunPartB(exampleData);
+
+            List<string[]> splitExampleData = new List<string[]>();
+            List<string> currentStrings = new List<string>();
+
+            foreach (string line in exampleData)
+            {
+                if (line.Equals("==="))
+                {
+                    splitExampleData.Add(currentStrings.ToArray());
+                    currentStrings.Clear();
+                }
+                else
+                {
+                    currentStrings.Add(line);
+                }
+            }
+
+            if (currentStrings.Count > 0)
+            {
+                splitExampleData.Add(currentStrings.ToArray());
+            }
+
+            string expectedAnswer = partChoice == 'a' ? splitExampleData[1][0] : splitExampleData[3][0];
+            string[] exampleDataInput = partChoice == 'a' ? splitExampleData[0] : splitExampleData[2];
+            string result = partChoice == 'a' ? solution.RunPartA(exampleDataInput) : solution.RunPartB(exampleDataInput);
 
             Console.WriteLine($"Result: {result}");
             Console.WriteLine($"Expected: {expectedAnswer}");

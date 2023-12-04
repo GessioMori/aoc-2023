@@ -9,31 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="Answers\day1_answer.txt">
+    <None Update="Examples\day1_example.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Answers\day3_answer.txt">
+    <None Update="Examples\day2_example.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Answers\day2_answer.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Examples\day1_exampleA.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Examples\day1_exampleB.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Examples\day2_exampleA.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Examples\day3_exampleA.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Examples\day3_exampleB.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Examples\day2_exampleB.txt">
+    <None Update="Examples\day3_example.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Inputs\day3.txt">

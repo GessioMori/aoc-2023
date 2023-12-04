@@ -73,10 +73,10 @@ namespace Main.Tools
             Console.WriteLine($"Result: {result}");
         }
 
-        public static bool ValidateArgs(string[] args, out int day, out char? testOrInput, out char? challengePart)
+        public static bool ValidateArgs(string[] args, out int day, out char testOrInput, out char challengePart)
         {
-            testOrInput = null;
-            challengePart = null;
+            testOrInput = 'i';
+            challengePart = 'a';
             day = 0;
             if (args.Length > 0)
             {

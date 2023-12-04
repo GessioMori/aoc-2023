@@ -3,22 +3,19 @@ public static class Program
 {
     static void Main(string[] args)
     {
-        if (Tools.ValidateArgs(args, out int dayToRun, out char? exampleOrInputChoice, out char? solutionPartChoice))
+        if (Tools.ValidateArgs(args, out int dayToRun, out char exampleOrInputChoice, out char solutionPartChoice))
         {
+            string filePath = (exampleOrInputChoice == 't')
+                ? $"Examples/day{dayToRun}_example.txt"
+                : $"Inputs/day{dayToRun}.txt";
+
             if (exampleOrInputChoice == 't')
             {
-                string examplePath = $"Examples/day{dayToRun}_example.txt";
-
-                Tools.RunExampleAndCheck(Tools.ReadFileToArray(examplePath),
-                    solutionPartChoice ?? 'a',
-                    dayToRun);
+                Tools.RunExampleAndCheck(Tools.ReadFileToArray(filePath), solutionPartChoice, dayToRun);
             }
             else
             {
-                string inputPath = $"Inputs/day{dayToRun}.txt";
-                string[] inputData = Tools.ReadFileToArray(inputPath);
-
-                Tools.RunSolution(inputData, solutionPartChoice ?? 'a', dayToRun);
+                Tools.RunSolution(Tools.ReadFileToArray(filePath), solutionPartChoice, dayToRun);
             }
         }
         else

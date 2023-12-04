@@ -19,37 +19,12 @@
 
                     if (pos.positionType == PositionType.symbol)
                     {
-                        for (int k = -1; k < 2; k++)
-                        {
-                            for (int l = -1; l < 2; l++)
-                            {
-                                int curX = pos.positionNumber.Item1 - k;
-                                int curY = pos.positionNumber.Item2 - l;
-
-                                if (curX >= 0 && curY >= 0)
-                                {
-                                    int? currentValue = positions[curX][curY].associatedPart;
-                                    string? currentId = positions[curX][curY].partId;
-
-                                    if (currentValue != null && currentId != null)
-                                    {
-                                        AddValueToAvailableParts(currentId, currentValue);
-                                    }
-                                }
-                            }
-                        }
+                        CheckPositionsAround(positions, pos);
                     }
                 }
             }
 
-            int total = 0;
-
-            foreach (int i in availableParts)
-            {
-                total += i;
-            }
-
-            return total.ToString();
+            return availableParts.Sum().ToString();
         }
 
         public void AddValueToAvailableParts(string? id, int? value)
@@ -58,6 +33,29 @@
             {
                 this.availableParts.Add(value ?? 0);
                 this.availablePartsIds.Add(id ?? "");
+            }
+        }
+
+        public void CheckPositionsAround(Position[][] positions, Position curPos)
+        {
+            for (int k = -1; k < 2; k++)
+            {
+                for (int l = -1; l < 2; l++)
+                {
+                    int curX = curPos.positionNumber.Item1 - k;
+                    int curY = curPos.positionNumber.Item2 - l;
+
+                    if (curX >= 0 && curY >= 0)
+                    {
+                        int? currentValue = positions[curX][curY].associatedPart;
+                        string? currentId = positions[curX][curY].partId;
+
+                        if (currentValue != null && currentId != null)
+                        {
+                            AddValueToAvailableParts(currentId, currentValue);
+                        }
+                    }
+                }
             }
         }
 
@@ -74,38 +72,13 @@
                 {
                     Position pos = positions[i][j];
 
-                    if (pos.positionType == PositionType.symbol && pos.positionValue == '*')
+                    if (pos.positionValue == '*')
                     {
-                        for (int k = -1; k < 2; k++)
-                        {
-                            for (int l = -1; l < 2; l++)
-                            {
-                                int curX = pos.positionNumber.Item1 - k;
-                                int curY = pos.positionNumber.Item2 - l;
-
-                                if (curX >= 0 && curY >= 0)
-                                {
-                                    int? currentValue = positions[curX][curY].associatedPart;
-                                    string? currentId = positions[curX][curY].partId;
-
-                                    if (currentValue != null && currentId != null)
-                                    {
-                                        AddValueToAvailableParts(currentId, currentValue);
-                                    }
-                                }
-                            }
-                        }
-
-                        int currentResult = 1;
-
-                        foreach (int num in availableParts)
-                        {
-                            currentResult *= num;
-                        }
+                        CheckPositionsAround(positions, pos);
 
                         if (availableParts.Count == 2)
                         {
-                            total += currentResult;
+                            total += availableParts[0] * availableParts[1];
                         }
 
                         this.availablePartsIds.Clear();

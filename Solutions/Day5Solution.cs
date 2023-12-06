@@ -108,14 +108,45 @@ namespace Main.Solutions
                     }
                 }
 
-                listOfSeedRanges = new List<SeedRange>(listOfSeedRangesForNextLevel);
+                listOfSeedRanges = MergeSeedRanges(new List<SeedRange>(listOfSeedRangesForNextLevel));
             }
-
-            listOfSeedRanges = listOfSeedRanges.OrderBy(seedRange => seedRange.seedStart).ToList();
 
             return listOfSeedRanges[0].seedStart.ToString();
         }
 
+
+        public List<SeedRange> MergeSeedRanges(List<SeedRange> listOfSeedRanges)
+        {
+            if (listOfSeedRanges.Count <= 1)
+            {
+                return listOfSeedRanges;
+            }
+
+            listOfSeedRanges = listOfSeedRanges.OrderBy(seedRange => seedRange.seedStart).ToList();
+
+            List<SeedRange> mergedRanges = new List<SeedRange>();
+
+            SeedRange currentSeedRange = listOfSeedRanges[0];
+
+            for (int i = 1; i < listOfSeedRanges.Count; i++)
+            {
+                SeedRange nextSeedRange = listOfSeedRanges[i];
+
+                if (currentSeedRange.seedEnd >= nextSeedRange.seedStart)
+                {
+                    currentSeedRange.seedEnd = long.Max(currentSeedRange.seedEnd, nextSeedRange.seedEnd);
+                }
+                else
+                {
+                    mergedRanges.Add(currentSeedRange);
+                    currentSeedRange = nextSeedRange;
+                }
+            }
+
+            mergedRanges.Add(currentSeedRange);
+
+            return mergedRanges;
+        }
         public string RunPartBOnBruteForce(Dictionary<string, List<Map>> dicOfLevels, IEnumerable<long> listOfSeedRanges)
         {
             long lowestLocation = long.MaxValue;

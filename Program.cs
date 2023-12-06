@@ -1,4 +1,5 @@
 ﻿using Main.Tools;
+using System.Diagnostics;
 public static class Program
 {
     static void Main(string[] args)
@@ -9,6 +10,8 @@ public static class Program
                 ? $"Examples/day{dayToRun}_example.txt"
                 : $"Inputs/day{dayToRun}.txt";
 
+            Stopwatch sw = Stopwatch.StartNew();
+
             if (exampleOrInputChoice == 't')
             {
                 Tools.RunExampleAndCheck(Tools.ReadFileToArray(filePath), solutionPartChoice, dayToRun);
@@ -17,6 +20,10 @@ public static class Program
             {
                 Tools.RunSolution(Tools.ReadFileToArray(filePath), solutionPartChoice, dayToRun);
             }
+
+            sw.Stop();
+
+            Console.WriteLine($"Time taken: {sw.Elapsed.TotalMilliseconds} ms");
         }
         else
         {

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Main.Solutions
 {
@@ -36,19 +37,98 @@ namespace Main.Solutions
         {
             Dictionary<string, List<Map>> maps = GetMaps(inputData);
 
-            IEnumerable<long> seeds = GetSeedsRange(GetSeeds(inputData));
+            //return RunPartBOnBruteForce(maps, GetListOfSeedsFromRange(GetSeeds(inputData)));
 
+            return RunPartBFast(maps, GetListOfSeedsRange(GetSeeds(inputData)));
+        }
+
+        public string RunPartBFast(Dictionary<string, List<Map>> dicOfLevels, List<SeedRange> listOfSeedRanges)
+        {
+            foreach (KeyValuePair<string, List<Map>> level in dicOfLevels)
+            {
+                List<SeedRange> listOfSeedRangesForNextLevel = new List<SeedRange>();
+
+                while (listOfSeedRanges.Count > 0)
+                {
+                    SeedRange currentSeedRange = new SeedRange()
+                    {
+                        seedStart = listOfSeedRanges[listOfSeedRanges.Count - 1].seedStart,
+                        seedEnd = listOfSeedRanges[listOfSeedRanges.Count - 1].seedEnd
+                    };
+
+                    listOfSeedRanges.RemoveAt(listOfSeedRanges.Count - 1);
+
+                    bool rangeHasCollided = false;
+
+                    foreach (Map map in level.Value)
+                    {
+                        long newSeedRangeStart = long.Max(currentSeedRange.seedStart, map.sourceRangeStart);
+                        long newSeedRangeEnd = long.Min(currentSeedRange.seedEnd, map.sourceRangeStart + map.rangeLength);
+
+                        if (newSeedRangeStart < newSeedRangeEnd)
+                        {
+                            listOfSeedRangesForNextLevel.Add(
+                                new SeedRange()
+                                {
+                                    seedStart = newSeedRangeStart + map.destinationRangeStart - map.sourceRangeStart,
+                                    seedEnd = newSeedRangeEnd + map.destinationRangeStart - map.sourceRangeStart
+                                });
+
+                            if (currentSeedRange.seedStart < map.sourceRangeStart)
+                            {
+                                listOfSeedRanges.Add(
+                                    new SeedRange()
+                                    {
+                                        seedStart = currentSeedRange.seedStart,
+                                        seedEnd = map.sourceRangeStart
+                                    });
+                            }
+                            if (currentSeedRange.seedEnd > map.sourceRangeStart + map.rangeLength)
+                            {
+                                listOfSeedRanges.Add(
+                                    new SeedRange()
+                                    {
+                                        seedStart = map.sourceRangeStart + map.rangeLength,
+                                        seedEnd = currentSeedRange.seedEnd
+                                    });
+                            }
+
+                            rangeHasCollided = true;
+                        }
+                    }
+
+                    if (!rangeHasCollided)
+                    {
+                        listOfSeedRangesForNextLevel.Add(
+                            new SeedRange()
+                            {
+                                seedStart = currentSeedRange.seedStart,
+                                seedEnd = currentSeedRange.seedEnd
+                            });
+                    }
+                }
+
+                listOfSeedRanges = new List<SeedRange>(listOfSeedRangesForNextLevel);
+            }
+
+            listOfSeedRanges = listOfSeedRanges.OrderBy(seedRange => seedRange.seedStart).ToList();
+
+            return listOfSeedRanges[0].seedStart.ToString();
+        }
+
+        public string RunPartBOnBruteForce(Dictionary<string, List<Map>> dicOfLevels, IEnumerable<long> listOfSeedRanges)
+        {
             long lowestLocation = long.MaxValue;
 
             object lowestLocationLock = new object();
 
-            Parallel.ForEach(seeds, seed =>
+            Parallel.ForEach(listOfSeedRanges, seed =>
             {
                 long currentPosition = seed;
 
-                foreach (KeyValuePair<string, List<Map>> map in maps)
+                foreach (KeyValuePair<string, List<Map>> level in dicOfLevels)
                 {
-                    currentPosition = MapValue(map, currentPosition);
+                    currentPosition = MapValue(level, currentPosition);
                 }
 
                 lock (lowestLocationLock)
@@ -88,7 +168,7 @@ namespace Main.Solutions
                 .ToList();
         }
 
-        public IEnumerable<long> GetSeedsRange(List<long> seedsInput)
+        public IEnumerable<long> GetListOfSeedsFromRange(List<long> seedsInput)
         {
             for (int i = 0; i < seedsInput.Count; i += 2)
             {
@@ -97,6 +177,22 @@ namespace Main.Solutions
                     yield return j;
                 }
             }
+        }
+
+        public List<SeedRange> GetListOfSeedsRange(List<long> seedsInput)
+        {
+            List<SeedRange> listOfSeedsRange = new List<SeedRange>();
+
+            for (int i = 0; i < seedsInput.Count; i += 2)
+            {
+                listOfSeedsRange.Add(new SeedRange()
+                {
+                    seedStart = seedsInput[i],
+                    seedEnd = seedsInput[i] + seedsInput[i + 1]
+                });
+            }
+
+            return listOfSeedsRange;
         }
 
         public Dictionary<string, List<Map>> GetMaps(string[] inputData)
@@ -140,6 +236,12 @@ namespace Main.Solutions
 
             return maps;
         }
+    }
+
+    internal class SeedRange
+    {
+        public required long seedStart;
+        public required long seedEnd;
     }
 
     internal class Map

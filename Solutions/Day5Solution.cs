@@ -109,11 +109,13 @@ namespace Main.Solutions
                 }
 
                 listOfSeedRanges = MergeSeedRanges(new List<SeedRange>(listOfSeedRangesForNextLevel));
+                //listOfSeedRanges = new List<SeedRange>(listOfSeedRangesForNextLevel);
             }
+            
+            //listOfSeedRanges = listOfSeedRanges.OrderBy(seedRange => seedRange.seedStart).ToList();
 
             return listOfSeedRanges[0].seedStart.ToString();
         }
-
 
         public List<SeedRange> MergeSeedRanges(List<SeedRange> listOfSeedRanges)
         {

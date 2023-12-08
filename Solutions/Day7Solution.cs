@@ -141,37 +141,25 @@ namespace Main.Solutions
                 }
             }
 
-            if (charCountDictionary.Count == 1)
-            {
-                return HandStrength.FiveOfKind;
-            }
-            else if (charCountDictionary.Count == 2 &&
-                charCountDictionary.Any(c => c.Value == 4))
-            {
-                return HandStrength.FourOfKind;
-            }
-            else if (charCountDictionary.Count == 2 &&
-                charCountDictionary.Any(c => c.Value == 3))
-            {
-                return HandStrength.FullHouse;
-            }
-            else if (charCountDictionary.Count == 3 &&
-                charCountDictionary.Any(c => c.Value == 3))
-            {
-                return HandStrength.ThreeOfKind;
-            }
-            else if (charCountDictionary.Count == 3 &&
-                charCountDictionary.Count(c => c.Value == 2) == 2)
-            {
-                return HandStrength.TwoPair;
-            }
-            else if (charCountDictionary.Count == 4 &&
-                charCountDictionary.Any(c => c.Value == 2))
-            {
-                return HandStrength.OnePair;
-            }
+            int distinctCount = charCountDictionary.Count;
+            int maxCount = charCountDictionary.Max(pair => pair.Value);
 
-            return HandStrength.HighCard;
+            switch (distinctCount)
+            {
+                case 1:
+                    return HandStrength.FiveOfKind;
+                case 2:
+                    return maxCount == 4 ? HandStrength.FourOfKind :
+                           maxCount == 3 ? HandStrength.FullHouse :
+                           HandStrength.TwoPair;
+                case 3:
+                    return maxCount == 3 ? HandStrength.ThreeOfKind :
+                           HandStrength.TwoPair;
+                case 4:
+                    return HandStrength.OnePair;
+                default:
+                    return HandStrength.HighCard;
+            }
         }
 
         public HandStrength CalculateHandStrenghtWithJokers(char[] cards)

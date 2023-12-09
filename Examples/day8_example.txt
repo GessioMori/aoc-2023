@@ -1,0 +1,20 @@
+LLR
+
+AAA = (BBB, BBB)
+BBB = (AAA, ZZZ)
+ZZZ = (ZZZ, ZZZ)
+===
+6
+===
+LR
+
+VVA = (VVB, XXX)
+VVB = (XXX, VVZ)
+VVZ = (VVB, XXX)
+XXA = (XXB, XXX)
+XXB = (XXC, XXC)
+XXC = (XXZ, XXZ)
+XXZ = (XXB, XXB)
+XXX = (XXX, XXX)
+===
+6

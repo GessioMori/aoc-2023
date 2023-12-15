@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Main.Tools;
+using System.Collections.Concurrent;
 
 namespace Main.Solutions
 {

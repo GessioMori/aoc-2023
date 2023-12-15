@@ -1,5 +1,4 @@
-﻿using Main.Solutions;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Main.Tools
 {
@@ -157,5 +156,11 @@ namespace Main.Tools
 
             return matrix;
         }
+    }
+
+    public interface ISolution
+    {
+        string RunPartA(string[] inputData);
+        string RunPartB(string[] inputData);
     }
 }

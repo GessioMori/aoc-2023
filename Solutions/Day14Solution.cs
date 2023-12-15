@@ -1,34 +1,36 @@
-﻿namespace Main.Solutions
+﻿using Main.Tools;
+
+namespace Main.Solutions
 {
     internal class Day14Solution : ISolution
     {
         public string RunPartA(string[] inputData)
         {
-            List<List<char>> mapByColumns = Tools.Funcs.TransposeMatrix(
+            List<List<char>> mapByColumns = Funcs.TransposeMatrix(
                 RollOneDirection(
                     SortSublist,
-                    Tools.Funcs.TransposeMatrix(
-                        Tools.Funcs.GetCharMatrix(inputData))));
+                    Funcs.TransposeMatrix(
+                        Funcs.GetCharMatrix(inputData))));
 
             return MeasureLoad(mapByColumns);
         }
 
         public string RunPartB(string[] inputData)
         {
-            List<List<char>> mapByColumns = RollStonesFullCycle(Tools.Funcs.TransposeMatrix(Tools.Funcs.GetCharMatrix(inputData)));
+            List<List<char>> mapByColumns = RollStonesFullCycle(Funcs.TransposeMatrix(Funcs.GetCharMatrix(inputData)));
 
             for (int i = 0; i < 999; i++)
             {
                 mapByColumns = RollStonesFullCycle(mapByColumns);
             }
 
-            List<List<char>> mapAfter1000Cycles = Tools.Funcs.CopyListOfLists(mapByColumns);
+            List<List<char>> mapAfter1000Cycles = Funcs.CopyListOfLists(mapByColumns);
 
             int cycles = 1;
 
             mapByColumns = RollStonesFullCycle(mapByColumns);
 
-            while (!Tools.Funcs.AreListsEqual(mapAfter1000Cycles, mapByColumns))
+            while (!Funcs.AreListsEqual(mapAfter1000Cycles, mapByColumns))
             {
                 cycles++;
                 mapByColumns = RollStonesFullCycle(mapByColumns);
@@ -36,7 +38,7 @@
 
             int cycleMod = (1000000000 - 1000) % cycles;
 
-            mapByColumns = Tools.Funcs.CopyListOfLists(mapAfter1000Cycles);
+            mapByColumns = Funcs.CopyListOfLists(mapAfter1000Cycles);
 
             for (int i = 1; i < cycleMod; i++)
             {
@@ -89,7 +91,7 @@
                 rolledMap.Add(joinedList);
             }
 
-            return Tools.Funcs.TransposeMatrix(rolledMap);
+            return Funcs.TransposeMatrix(rolledMap);
         }
 
         public static List<List<char>> SplitList(List<char> inputList, char separator)

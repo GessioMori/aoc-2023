@@ -1,4 +1,6 @@
-﻿namespace Main.Solutions
+﻿using Main.Tools;
+
+namespace Main.Solutions
 {
     internal class Day13Solution : ISolution
     {
@@ -12,7 +14,7 @@
             {
                 total += FindRowMirror(pattern) * 100;
 
-                List<List<char>> transposedPattern = TransposePattern(pattern);
+                List<List<char>> transposedPattern = Funcs.TransposeMatrix(pattern);
 
                 total += FindRowMirror(transposedPattern);
             }
@@ -29,7 +31,7 @@
             {
                 total += FindWithSmudge(pattern) * 100;
 
-                List<List<char>> transposedPattern = TransposePattern(pattern);
+                List<List<char>> transposedPattern = Funcs.TransposeMatrix(pattern);
 
                 total += FindWithSmudge(transposedPattern);
             }
@@ -82,7 +84,7 @@
 
                 secondPart.Reverse();
 
-                if (AreListsEqual(firstPart, secondPart) && i != originalResult)
+                if (Funcs.AreListsEqual(firstPart, secondPart) && i != originalResult)
                 {
                     result = i;
                     break;
@@ -138,43 +140,5 @@
 
             return newList;
         }
-        public static bool AreListsEqual(List<List<char>> list1, List<List<char>> list2)
-        {
-            if (list1.Count != list2.Count)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < list1.Count; i++)
-            {
-                if (!list1[i].SequenceEqual(list2[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public static List<List<char>> TransposePattern(List<List<char>> originalList)
-        {
-            int rows = originalList.Count;
-            int cols = originalList[0].Count;
-
-            List<List<char>> transposedList = new List<List<char>>();
-            for (int col = 0; col < cols; col++)
-            {
-                List<char> newRow = new List<char>();
-                for (int row = 0; row < rows; row++)
-                {
-                    char c = originalList[row][col];
-                    newRow.Add(c);
-                }
-                transposedList.Add(newRow);
-            }
-
-            return transposedList;
-        }
     }
-
-
 }

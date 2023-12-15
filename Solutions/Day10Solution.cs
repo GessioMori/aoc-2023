@@ -1,4 +1,6 @@
-﻿namespace Main.Solutions
+﻿using Main.Tools;
+
+namespace Main.Solutions
 {
     internal class Day10Solution : ISolution
     {

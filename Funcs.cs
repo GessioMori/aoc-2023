@@ -93,7 +93,7 @@ namespace Main.Tools
 
             return false;
         }
-        
+
         public static List<List<char>> CopyListOfLists(List<List<char>> originalList)
         {
             List<List<char>> newList = new List<List<char>>();
@@ -155,6 +155,26 @@ namespace Main.Tools
             }
 
             return matrix;
+        }
+
+        public static int[,] ConvertStringArrayToGrid(string[] gridStrings)
+        {
+            int rows = gridStrings.Length;
+            int cols = gridStrings[0].Length;
+            int[,] grid = new int[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (!int.TryParse(gridStrings[i][j].ToString(), out grid[i, j]))
+                    {
+                        Console.WriteLine($"Error parsing value at row {i}, column {j}");
+                    }
+                }
+            }
+
+            return grid;
         }
     }
 

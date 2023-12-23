@@ -1,6 +1,4 @@
 ﻿using Main.Tools;
-using System.Collections.Generic;
-using System.Formats.Tar;
 
 namespace Main.Solutions
 {
@@ -10,39 +8,32 @@ namespace Main.Solutions
         {
             int[,] grid = Funcs.ConvertStringArrayToGrid(inputData);
 
-            int result = Dijkstra(grid);
+            int result = Dijkstra(grid, 3, false);
 
             return result.ToString();
         }
 
         public string RunPartB(string[] inputData)
         {
-            throw new NotImplementedException();
+            int[,] grid = Funcs.ConvertStringArrayToGrid(inputData);
+
+            int result = Dijkstra(grid, 10, true);
+
+            return result.ToString();
         }
 
-        static int Dijkstra(int[,] grid)
+        static int Dijkstra(int[,] grid, int maxStepsNumber, bool hasMinSteps)
         {
             int[] dx = [1, -1, 0, 0];
             int[] dy = [0, 0, 1, -1];
 
             int rows = grid.GetLength(0);
             int cols = grid.GetLength(1);
+
             int maxStraightLine = Math.Max(rows, cols);
 
-            int[,] parentX = new int[rows, cols];
-            int[,] parentY = new int[rows, cols];
-
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    parentX[i, j] = -1;
-                    parentY[i, j] = -1;
-                }
-            }
-
-            int[,,,] distance = new int[rows, cols, maxStraightLine, maxStraightLine];
-            bool[,,,] visited = new bool[rows, cols, maxStraightLine, maxStraightLine];
+            int[,,,] distance = new int[rows, cols, maxStraightLine, 4];
+            bool[,,,] visited = new bool[rows, cols, maxStraightLine, 4];
 
             for (int i = 0; i < rows; i++)
             {
@@ -50,7 +41,7 @@ namespace Main.Solutions
                 {
                     for (int k = 0; k < maxStraightLine; k++)
                     {
-                        for (int l = 0; l < maxStraightLine; l++)
+                        for (int l = 0; l < 4; l++)
                         {
                             distance[i, j, k, l] = int.MaxValue;
                             visited[i, j, k, l] = false;
@@ -59,7 +50,7 @@ namespace Main.Solutions
                 }
             }
 
-            PriorityQueue<(int, int, int, int), int> pq = new();
+            Tools.PriorityQueue<(int, int, int, int), int> pq = new();
 
             pq.Enqueue((0, 0, 0, 0), 0);
 
@@ -67,9 +58,8 @@ namespace Main.Solutions
             {
                 var ((x, y, sameDirectionSteps, direction), dist) = pq.Dequeue();
 
-                if (x == rows - 1 && y == cols - 1)
+                if (x == rows - 1 && y == cols - 1 && (!hasMinSteps || sameDirectionSteps >= 4))
                 {
-                    //PrintPath(rows, cols, parentX, parentY);
                     return dist;
                 }
 
@@ -81,7 +71,7 @@ namespace Main.Solutions
                 {
                     for (int k = 0; k < maxStraightLine; k++)
                     {
-                        for (int l = 0; l < maxStraightLine; l++)
+                        for (int l = 0; l < 4; l++)
                         {
                             distance[0, 0, k, l] = 0;
                             visited[0, 0, k, l] = true;
@@ -101,11 +91,15 @@ namespace Main.Solutions
                     else if (dx[i] == -1) nextStepDirection = 2;
                     else nextStepDirection = 3;
 
-                    int nextStepsNumber = nextStepDirection == direction ? sameDirectionSteps + 1 : 0;
+                    int nextStepsNumber = nextStepDirection == direction ? sameDirectionSteps + 1 : 1;
 
                     bool isReturning = Math.Abs(direction - nextStepDirection) == 2;
 
-                    if (IsValid(nx, ny, rows, cols) && !visited[nx, ny, nextStepDirection, nextStepsNumber] && !isReturning && nextStepsNumber < 3)
+                    if (IsValid(nx, ny, rows, cols) &&
+                        !visited[nx, ny, nextStepsNumber, nextStepDirection] &&
+                        !isReturning &&
+                        nextStepsNumber <= maxStepsNumber &&
+                        (!hasMinSteps || (nextStepDirection == direction || sameDirectionSteps >= 4 || (x == 0 && y == 0))))
                     {
                         int calcDistance = (dist + grid[nx, ny]);
 
@@ -113,8 +107,6 @@ namespace Main.Solutions
                         {
                             distance[nx, ny, nextStepsNumber, nextStepDirection] = calcDistance;
                             pq.Enqueue((nx, ny, nextStepsNumber, nextStepDirection), calcDistance);
-                            parentX[nx, ny] = x;
-                            parentY[nx, ny] = y;
                         }
                     }
                 }
@@ -127,87 +119,7 @@ namespace Main.Solutions
         {
             return x >= 0 && x < Rows && y >= 0 && y < Cols;
         }
-
-        static void PrintPath(int Rows, int Cols, int[,] parentX, int[,] parentY)
-        {
-            List<(int, int)> path = new List<(int, int)>();
-            int x = Rows - 1;
-            int y = Cols - 1;
-
-            while (x != 0 || y != 0)
-            {
-                path.Add((x, y));
-                int prevX = parentX[x, y];
-                int prevY = parentY[x, y];
-                x = prevX;
-                y = prevY;
-            }
-
-            path.Add((0, 0));
-            path.Reverse();
-
-            foreach (var (px, py) in path)
-            {
-                Console.Write($"({px}, {py}) ");
-            }
-
-            Console.WriteLine();
-        }
-
-
     }
 
-    class PriorityQueue<T, U> where U : IComparable<U>
-    {
-        private List<(T, U)> heap = [];
 
-        public int Count => heap.Count;
-
-        public void Enqueue(T item, U priority)
-        {
-            heap.Add((item, priority));
-            int i = heap.Count - 1;
-            while (i > 0)
-            {
-                int j = (i - 1) / 2;
-                if (heap[i].Item2.CompareTo(heap[j].Item2) >= 0)
-                    break;
-                Swap(i, j);
-                i = j;
-            }
-        }
-
-        public (T, U) Dequeue()
-        {
-            int lastIndex = heap.Count - 1;
-            (T, U) frontItem = heap[0];
-            heap[0] = heap[lastIndex];
-            heap.RemoveAt(lastIndex);
-
-            lastIndex--;
-            int i = 0;
-            while (true)
-            {
-                int leftIndex = 2 * i + 1;
-                if (leftIndex > lastIndex)
-                    break;
-                int rightIndex = leftIndex + 1;
-                if (rightIndex <= lastIndex && heap[rightIndex].Item2.CompareTo(heap[leftIndex].Item2) < 0)
-                    leftIndex = rightIndex;
-                if (heap[leftIndex].Item2.CompareTo(heap[i].Item2) >= 0)
-                    break;
-                Swap(i, leftIndex);
-                i = leftIndex;
-            }
-
-            return frontItem;
-        }
-
-        private void Swap(int i, int j)
-        {
-            (T, U) temp = heap[i];
-            heap[i] = heap[j];
-            heap[j] = temp;
-        }
-    }
 }

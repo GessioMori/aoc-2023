@@ -183,4 +183,58 @@ namespace Main.Tools
         string RunPartA(string[] inputData);
         string RunPartB(string[] inputData);
     }
+
+    public class PriorityQueue<T, U> where U : IComparable<U>
+    {
+        private List<(T, U)> heap = [];
+
+        public int Count => heap.Count;
+
+        public void Enqueue(T item, U priority)
+        {
+            heap.Add((item, priority));
+            int i = heap.Count - 1;
+            while (i > 0)
+            {
+                int j = (i - 1) / 2;
+                if (heap[i].Item2.CompareTo(heap[j].Item2) >= 0)
+                {
+                    break;
+                }
+                Swap(i, j);
+                i = j;
+            }
+        }
+
+        public (T, U) Dequeue()
+        {
+            int lastIndex = heap.Count - 1;
+            (T, U) frontItem = heap[0];
+            heap[0] = heap[lastIndex];
+            heap.RemoveAt(lastIndex);
+
+            lastIndex--;
+            int i = 0;
+            while (true)
+            {
+                int leftIndex = 2 * i + 1;
+                if (leftIndex > lastIndex)
+                    break;
+                int rightIndex = leftIndex + 1;
+                if (rightIndex <= lastIndex && heap[rightIndex].Item2.CompareTo(heap[leftIndex].Item2) < 0)
+                    leftIndex = rightIndex;
+                if (heap[leftIndex].Item2.CompareTo(heap[i].Item2) >= 0)
+                    break;
+                Swap(i, leftIndex);
+                i = leftIndex;
+            }
+
+            return frontItem;
+        }
+
+        private void Swap(int i, int j)
+        {
+            (heap[j], heap[i]) = (heap[i], heap[j]);
+        }
+    }
 }

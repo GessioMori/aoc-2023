@@ -1,4 +1,5 @@
 ﻿using Main.Tools;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -19,7 +20,129 @@ namespace Main.Solutions
 
         public string RunPartB(string[] inputData)
         {
-            throw new NotImplementedException();
+            (Dictionary<string, Workflow> workflowDict, List<Part> _) = ProcessLines(inputData);
+
+            Dictionary<Category, (int, int)> originalRanges = new() {
+                {Category.x, (1, 4000) },
+                {Category.m, (1, 4000) },
+                {Category.a, (1, 4000) },
+                {Category.s, (1, 4000) }
+            };
+
+            Range firstRange = new Range(workflowDict["in"], originalRanges, 0);
+
+            List<Range> rangeQueue = [firstRange];
+
+            List<Range> approvedRanges = [];
+
+            while (rangeQueue.Count > 0)
+            {
+                Range currentRange = rangeQueue[0];
+
+                rangeQueue.RemoveAt(0);
+
+                ProcessRangeForWorkflowRule(currentRange, currentRange.currentWorkflow, currentRange.currentWorkflowStage, approvedRanges, workflowDict, rangeQueue);
+            }
+
+            double total = approvedRanges.Sum(range =>
+            {
+                double totalX = CalculateTotalForCategory(range, Category.x);
+                double totalM = CalculateTotalForCategory(range, Category.m);
+                double totalA = CalculateTotalForCategory(range, Category.a);
+                double totalS = CalculateTotalForCategory(range, Category.s);
+
+                return totalX * totalM * totalA * totalS;
+            });
+
+            return total.ToString();
+        }
+
+        static double CalculateTotalForCategory(Range range, Category category)
+        {
+            (int start, int end) = range.ranges[category];
+            return end - start + 1;
+        }
+
+        public static void ProcessRangeForWorkflowRule(Range range, Workflow currentWorkflow, int currentWorkflowRule, List<Range> approvedRanges, Dictionary<string, Workflow> workflowDict, List<Range> rangeQueue)
+        {
+            if (currentWorkflow.rules.Count == currentWorkflowRule)
+            {
+                if (currentWorkflow.fallback == "A")
+                {
+                    Range copy = new(range.currentWorkflow, range.ranges, range.currentWorkflowStage);
+                    approvedRanges.Add(copy);
+                }
+                else if (currentWorkflow.fallback != "R")
+                {
+                    range.currentWorkflow = workflowDict[currentWorkflow.fallback];
+                    range.currentWorkflowStage = 0;
+                    rangeQueue.Add(range);
+                }
+            }
+            else
+            {
+                Rule currentRule = currentWorkflow.rules[currentWorkflowRule];
+
+                Category categoryToSplit = currentRule.category;
+
+                int numToSplit = currentRule.isGreater ? currentRule.cutLine + 1 : currentRule.cutLine - 1;
+
+                bool shouldSplit = range.ranges[categoryToSplit].Item1 < numToSplit &&
+                    range.ranges[categoryToSplit].Item2 > numToSplit;
+
+                if (shouldSplit)
+                {
+                    Dictionary<Category, (int, int)> DictPartA = new(range.ranges);
+
+                    DictPartA[currentRule.category] = (DictPartA[currentRule.category].Item1, currentRule.isGreater ? numToSplit - 1 : numToSplit);
+
+                    bool isApproval = currentRule.result == "A";
+
+                    bool isRepproval = currentRule.result == "R";
+
+                    bool shouldApprovePartA = isApproval && !currentRule.isGreater;
+
+                    bool shouldApprovePartB = isApproval && currentRule.isGreater;
+
+                    bool shouldRepprovePartA = isRepproval && !currentRule.isGreater;
+
+                    bool shouldRepprovePartB = isRepproval && currentRule.isGreater;
+
+                    Range rangePartA = new(!currentRule.isGreater ? isApproval ? range.currentWorkflow : workflowDict[!isRepproval ? currentRule.result : range.currentWorkflow.name] : currentWorkflow,
+                        DictPartA,
+                        currentRule.isGreater ? currentWorkflowRule + 1 : 0);
+
+                    Dictionary<Category, (int, int)> DictPartB = new(range.ranges);
+
+                    DictPartB[currentRule.category] = (currentRule.isGreater ? numToSplit : numToSplit + 1, DictPartB[currentRule.category].Item2);
+
+                    Range rangePartB = new(currentRule.isGreater ? isApproval ? range.currentWorkflow : workflowDict[!isRepproval ? currentRule.result : range.currentWorkflow.name] : currentWorkflow,
+                        DictPartB,
+                        currentRule.isGreater ? 0 : currentWorkflowRule + 1);
+
+
+
+                    if (shouldApprovePartA)
+                    {
+                        approvedRanges.Add(rangePartA);
+                    }
+                    else if (!shouldRepprovePartA)
+                    {
+                        rangeQueue.Add(rangePartA);
+                    }
+
+                    if (shouldApprovePartB)
+                    {
+                        approvedRanges.Add(rangePartB);
+                    }
+                    else if (!shouldRepprovePartB)
+                    {
+                        rangeQueue.Add(rangePartB);
+                    }
+
+
+                }
+            }
         }
 
         public static (Dictionary<string, Workflow>, List<Part>) ProcessLines(string[] inputData)
@@ -149,5 +272,14 @@ namespace Main.Solutions
     internal class Part
     {
         public Dictionary<Category, int> values = [];
+    }
+
+    internal class Range(Workflow currentWorkflow, Dictionary<Category, (int, int)> ranges, int currentWorkflowStage)
+    {
+        public Dictionary<Category, (int, int)> ranges = ranges;
+
+        public Workflow currentWorkflow = currentWorkflow;
+
+        public int currentWorkflowStage = currentWorkflowStage;
     }
 }

@@ -23,7 +23,70 @@ namespace Main.Solutions
 
         public string RunPartB(string[] inputData)
         {
-            throw new NotImplementedException();
+            (Broadcaster broadcaster, Dictionary<string, Node> nodes) = ProcessLines(inputData);
+
+            Converter nodeThatFeedsRX = (Converter)nodes.First(n => n.Value.Destinations.Contains("rx")).Value;
+
+            List<Node> nodesThatFeedRXFeeder = nodes
+                .Where(kv => nodeThatFeedsRX.ReceivingPulses.ContainsKey(kv.Key))
+                .Select(kv => kv.Value)
+                .ToList();
+
+            Dictionary<string, long> dictOfPressesToSendHigh = [];
+
+            foreach (Node node in nodesThatFeedRXFeeder)
+            {
+                dictOfPressesToSendHigh.Add(node.Name, 0L);
+            }
+
+            long numOfPresses = 0L;
+
+            while (dictOfPressesToSendHigh.Values.Any(v => v == 0))
+            {
+                numOfPresses++;
+                PressButtonUntilAllSendHigh(broadcaster, nodes, dictOfPressesToSendHigh, numOfPresses);
+            }
+
+            long result = dictOfPressesToSendHigh.Values.Aggregate(1L, Lcm);
+
+            return result.ToString();
+        }
+
+        long Lcm(long a, long b) => a * b / Gcd(a, b);
+        long Gcd(long a, long b) => b == 0 ? a : Gcd(b, a % b);
+
+        public static void PressButtonUntilAllSendHigh(Broadcaster broadcaster, Dictionary<string, Node> nodes, Dictionary<string, long> dictOfPressesToSendHigh, long numOfPresses)
+        {
+            Queue<Pulse> pulseQueue = new();
+
+            foreach (string destination in broadcaster.Destinations)
+            {
+                pulseQueue.Enqueue(new Pulse(PulseType.Low, "broadcaster", destination));
+            }
+
+            while (pulseQueue.Count > 0)
+            {
+                Pulse currentPulse = pulseQueue.Dequeue();
+
+                if (nodes.TryGetValue(currentPulse.Receiver, out Node? value))
+                {
+                    Node currentNode = value;
+
+                    List<Pulse> pulses = currentNode.ReceiveAndSendPulse(currentPulse);
+
+                    foreach (Pulse pulse in pulses)
+                    {
+                        if (dictOfPressesToSendHigh.TryGetValue(pulse.Emmiter, out long presses) &&
+                            presses == 0 &&
+                            pulse.Type == PulseType.High)
+                        {
+                            dictOfPressesToSendHigh[pulse.Emmiter] = numOfPresses;
+                        }
+
+                        pulseQueue.Enqueue(pulse);
+                    }
+                }
+            }
         }
 
         public static (long, long) PressButton(Broadcaster broadcaster, Dictionary<string, Node> nodes)

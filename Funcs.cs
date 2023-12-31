@@ -176,6 +176,23 @@ namespace Main.Tools
 
             return grid;
         }
+
+        public static char[,] ConvertStringArrayToCharGrid(string[] gridStrings)
+        {
+            int rows = gridStrings.Length;
+            int cols = gridStrings[0].Length;
+            char[,] grid = new char[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    grid[i, j] = gridStrings[i][j];
+                }
+            }
+
+            return grid;
+        }
     }
 
     public interface ISolution
